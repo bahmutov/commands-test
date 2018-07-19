@@ -82,9 +82,23 @@ Cypress.on('fail', (e) => {
   console.log('skipped chains', skippedChains)
 
   // print
+  console.group('Passing commands')
   passedChaines.forEach(chain => console.log('%c%s', 'color: green', chainText(chain)))
-  console.log('%c%s', 'color: red', chainText(failedChain))
+  console.groupEnd()
+
+  const failedCommandIndex = _.findIndex(failedChain, failedCommand)
+  const passedCommandsInFailedChain = _.slice(failedChain, 0, failedCommandIndex)
+  const failedCommandsInFailedChain = _.slice(failedChain, failedCommandIndex)
+
+  console.log('%c%s\n%c%s',
+    'color: green', chainText(passedCommandsInFailedChain),
+    'color: red', chainText(failedCommandsInFailedChain)
+  )
+  // TODO there might be also skipped commands in the failed chain
+
+  console.group('Skipped commands')
   skippedChains.forEach(chain => console.log('%c%s', 'color: lightGrey', chainText(chain)))
+  console.groupEnd()
 })
 
 it('fails', () => {
@@ -94,6 +108,7 @@ it('fails', () => {
   // failing assertion on purpose
   cy.log('about to fail')
   cy.wrap({value: 2})
+    .should('deep.equal', {value: 2})
     .its('value')
     .should('equal', 2).and('equal', 3)
 
