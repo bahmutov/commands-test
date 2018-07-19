@@ -1,3 +1,5 @@
+const chalk = require('chalk')
+
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
 //
@@ -14,4 +16,17 @@
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
+  on('task', {
+    logCommands ({passed, failed, skipped}) {
+      passed.forEach(chain => console.log(chalk.green(chain)))
+
+      const {good, bad} = failed
+      console.log(chalk.yellow(good))
+      console.log(chalk.red(bad))
+
+      skipped.forEach(chain => console.log(chalk.gray(chain)))
+
+      return null
+    }
+  })
 }

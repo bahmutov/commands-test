@@ -27,7 +27,18 @@ const findFirstCommand = (cmd) => {
   return findFirstCommand(stepBack(cmd))
 }
 
-Cypress.on('fail', (e) => {
+// Cypress.on('fail', (e) => {
+function onFailed () {
+  if (!this) {
+    return
+  }
+  if (!this.currentTest) {
+    return
+  }
+  if (this.currentTest.state === 'passed') {
+    return
+  }
+
   // console.error(e)
   const failedCommand = Cypress.state('current')
   console.log('failed command', failedCommand.attributes)
@@ -99,7 +110,32 @@ Cypress.on('fail', (e) => {
   console.group('Skipped commands')
   skippedChains.forEach(chain => console.log('%c%s', 'color: lightGrey', chainText(chain)))
   console.groupEnd()
-})
+
+  cy.task('logCommands', {
+    passed: passedChaines.map(chainText),
+    failed: {
+      good: chainText(passedCommandsInFailedChain),
+      bad: chainText(failedCommandsInFailedChain)
+    },
+    skipped: skippedChains.map(chainText)
+  })
+}
+
+const _afterEach = afterEach
+afterEach = (name, fn) => {
+  if (typeof name === 'function') {
+    fn = name
+    name = fn.name
+  }
+  // before running the client function "fn"
+  // run our "onFailed" to capture the screenshot sooner
+  _afterEach(name, function () {
+    onFailed.call(this)
+    fn()
+  })
+}
+
+afterEach(onFailed)
 
 it('fails', () => {
   cy.wrap({foo: 1}).its('foo').should('equal', 1)
