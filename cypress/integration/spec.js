@@ -1,7 +1,12 @@
 /// <reference types="cypress" />
 
+const _ = Cypress._
+
 const commandText = (cmd) =>
   `${cmd.attributes.name} ${cmd.attributes.args.map(JSON.stringify).join(', ')}`
+
+const chainText = (chain) =>
+  chain.map(commandText).join('\n')
 
 const stepBack = (cmd) =>
   cmd.attributes.prev
@@ -25,8 +30,7 @@ const findFirstCommand = (cmd) => {
 Cypress.on('fail', (e) => {
   // console.error(e)
   const failedCommand = Cypress.state('current')
-  const currentChainerId = failedCommand.attributes.chainerId
-  console.log('currentChainerId', currentChainerId)
+  console.log('failed command', failedCommand.attributes)
 
   const firstCommand = findFirstCommand(failedCommand)
   console.log('very first command', commandText(firstCommand))
@@ -35,7 +39,7 @@ Cypress.on('fail', (e) => {
     throw e
   }
   console.log(firstCommand.attributes)
-  debugger
+  // debugger
 
   // group all commands into chains (lists of commands)
   let cmd = firstCommand
@@ -64,6 +68,23 @@ Cypress.on('fail', (e) => {
 
   const nextCommand = failedCommand.attributes.next
   console.log(commandText(nextCommand))
+
+  const failedChainIndex = _.findIndex(chains, chain => chain.includes(failedCommand))
+  console.log('failed chain index', failedChainIndex)
+
+  const N = 5 // how many commands to print before and after
+  const passedChaines = _.slice(chains, _.max(0, failedChainIndex - N), failedChainIndex)
+  console.log('passed chains', passedChaines)
+
+  const failedChain = chains[failedChainIndex]
+
+  const skippedChains = _.slice(chains, failedChainIndex + 1, failedChainIndex + N)
+  console.log('skipped chains', skippedChains)
+
+  // print
+  passedChaines.forEach(chain => console.log('%c%s', 'color: green', chainText(chain)))
+  console.log('%c%s', 'color: red', chainText(failedChain))
+  skippedChains.forEach(chain => console.log('%c%s', 'color: lightGrey', chainText(chain)))
 })
 
 it('fails', () => {
@@ -72,8 +93,11 @@ it('fails', () => {
 
   // failing assertion on purpose
   cy.log('about to fail')
-  cy.wrap(2).should('be.equal', 3)
+  cy.wrap({value: 2})
+    .its('value')
+    .should('equal', 2).and('equal', 3)
 
   // another passing command that never runs
+  cy.log('these are commands after failing one')
   cy.wrap(true).should('equal', true)
 })
