@@ -22,3 +22,7 @@ Nice, but requires being able to store and open image artifacts, which is compli
 With this plugin, the terminal shows the commands on failure. Passing command chains are shown in green, the passing commands in the failed chain are shown in yellow, and failed command is shown in red, and the commands after the failure are shown in grey, because they were not executed.
 
 ![Terminal](img/terminal.png)
+
+This plugin even prints the commands in the DevTools using groups
+
+![DevTools](img/devtools.png)
