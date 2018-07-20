@@ -26,3 +26,9 @@ With this plugin, the terminal shows the commands on failure. Passing command ch
 This plugin even prints the commands in the DevTools using groups
 
 ![DevTools](img/devtools.png)
+
+## Related
+
+- [cypress-failed-log](https://github.com/bahmutov/cypress-failed-log)
+- [https://glebbahmutov.com/blog/tags/cypress/](https://glebbahmutov.com/blog/tags/cypress/)
+- [https://www.cypress.io/blog/](https://www.cypress.io/blog/)
